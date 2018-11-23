@@ -1,6 +1,7 @@
 import os
 import cv2
 import sys
+from dlgdrive import download_file_from_google_drive
 
 args = sys.argv
 
@@ -97,39 +98,54 @@ def configure_darkflow(is_new = True):
 
 def create_directories():
 	try:
-		os.mkdir('darkflow/bin')
+		os.mkdir('bin')
 	except FileExistsError:
-		print('darkflow/bin already exists')
+		print('bin already exists')
 
 	try:
-		os.mkdir('darkflow/logos')
+		os.mkdir('logos')
 	except FileExistsError:
-		print('darkflow/logos already exists')
+		print('logos already exists')
 
 	try:
-		os.mkdir('darkflow/logos_test')
+		os.mkdir('logos_test')
 	except FileExistsError:
-		print('darkflow/logos_test already exists')
+		print('logos_test already exists')
+
+	try:
+		os.mkdir('logos_val')
+	except FileExistsError:
+		print('logos_test already exists')
 
 	try:
 		os.mkdir(filespath)
 	except FileExistsError:
-		print('darkflow/logos/images already exists')
+		print('logos/images already exists')
 
 	try:
-		os.mkdir(annotationspath)
+		os.mkdir(annpath)
 	except FileExistsError:
-		print('darkflow/logos/annotations already exists')
+		print('logos/annotations already exists')
 
 	try:
 		os.mkdir(testfilespath)
 	except FileExistsError:
-		print('darkflow/logos_test/images already exists')
+		print('logos_test/images already exists')
 
 	try:
-		os.mkdir(testannotationspath)
+		os.mkdir(testannpath)
 	except FileExistsError:
-		print('darkflow/logos_test/annotations already exists')
+		print('logos_test/annotations already exists')
+
+	try:
+		os.mkdir(valfilespath)
+	except FileExistsError:
+		print('logos_val/images already exists')
+
+	try:
+		os.mkdir(valannpath)
+	except FileExistsError:
+		print('logos_val/annotations already exists')
 
 def move_files_with_bboxes():
 	create_directories()

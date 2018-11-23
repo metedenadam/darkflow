@@ -49,3 +49,11 @@ ckpt/*
 darkflow/.mypy_cache/*
 darkflow/.vscode/*
 darkflow/.cache/*
+
+#datasets
+logos/*
+logos_test/*
+logos_val/*
+
+#cython
+darkflow/cython_utils/*
