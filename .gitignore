@@ -43,4 +43,9 @@ built_graph/
 ckpt/*
 
 #pytest cache
-.cache/
+.cache/*
+.mypy_cache/3.7/*
+.vscode/*
+darkflow/.mypy_cache/*
+darkflow/.vscode/*
+darkflow/.cache/*
