@@ -148,6 +148,7 @@ def create_directories():
 		print('logos_val/annotations already exists')
 
 def move_files_with_bboxes():
+	os.system('mv FlickrLogos-v2/classes/masks/hp FlickrLogos-v2/classes/masks/HP')
 	create_directories()
 	nologocount = 0
 	os.system('cp ' + logospath + '/all.spaces.txt all.spaces.txt')
@@ -168,8 +169,8 @@ def move_files_with_bboxes():
 				os.rename(imgpath, filespath + '/' + line[1])
 			
 			if line[0] == 'no-logo':
+				xmlcontent = xmlcontent + xmlEndTemp
 				while nologocount < classcount * 10:
-					xmlcontent = xmlcontent + xmlEndTemp
 					if idx % 15 == 0:
 						txt_path = testannpath + '/' + line[1][:-4] + '.xml'
 					elif idx % 49 == 0:
@@ -199,6 +200,8 @@ def move_files_with_bboxes():
 				xmlcontent = xmlcontent + xmlEndTemp
 				if idx % 15 != 0:
 					txt_path = annpath + '/' + line[1][:-4] + '.xml'
+				elif idx % 49 == 0:
+					txt_path = valannpath + '/' + line[1][:-4] + '.xml'
 				else:
 					txt_path = testannpath + '/' + line[1][:-4] + '.xml'
 				with open(txt_path, 'w') as f:

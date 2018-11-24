@@ -61,13 +61,19 @@ def preprocess(self, im, allobj = None):
 	if allobj is not None: # in training mode
 		result = imcv2_affine_trans(im)
 		im, dims, trans_param = result
-		scale, offs, flip = trans_param
+		scale, offs, flip, vflip = trans_param
 		for obj in allobj:
 			_fix(obj, dims, scale, offs)
-			if not flip: continue
-			obj_1_ =  obj[1]
-			obj[1] = dims[0] - obj[3]
-			obj[3] = dims[0] - obj_1_
+			if flip: 
+				obj_1_ =  obj[1]
+				obj[1] = dims[0] - obj[3]
+				obj[3] = dims[0] - obj_1_
+				
+			if vflip:
+				obj_2_ = obj[2]
+				obj[2] = dims[1] - obj[4]
+				obj[4] = dims[1] - obj_2_
+
 		im = imcv2_recolor(im)
 
 	im = self.resize_input(im)
