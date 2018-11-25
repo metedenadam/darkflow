@@ -9,7 +9,7 @@ class argHandler(dict):
         self.define('imgdir', './logos_test/images/', 'path to testing directory with images')
         self.define('binary', './bin/', 'path to .weights directory')
         self.define('config', './cfg/', 'path to .cfg directory')
-        self.define('dataset', '../logos/images/', 'path to dataset directory')
+        self.define('dataset', './logos/images/', 'path to dataset directory')
         self.define('labels', 'labels.txt', 'path to labels file')
         self.define('val_dataset', './logos_val/images/', 'path to validation dataset directory')
         self.define('backup', './ckpt/', 'path to backup folder')
