@@ -1,4 +1,4 @@
-from ...utils.im_transform import imcv2_recolor, imcv2_affine_trans
+from ...utils.im_transform import imcv2_recolor, imcv2_affine_trans, imcv2_noise
 from ...utils.box import BoundBox, box_iou, prob_compare
 import numpy as np
 import cv2
@@ -59,6 +59,7 @@ def preprocess(self, im, allobj = None):
 		im = cv2.imread(im)
 
 	if allobj is not None: # in training mode
+		im = imcv2_noise(im)
 		result = imcv2_affine_trans(im)
 		im, dims, trans_param = result
 		scale, offs, flip, vflip = trans_param
