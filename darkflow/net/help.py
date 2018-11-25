@@ -8,8 +8,101 @@ import numpy as np
 import sys
 import cv2
 import os
+import json
+import xml.etree.ElementTree as ET
+from glob import glob
 
 old_graph_msg = 'Resolving old graph def {} (no guarantee)'
+
+class Obj:
+    def __init__(self, label, bbox):
+        self.label = label
+        self.bbox = bbox
+
+def bb_intersection_over_union(boxA, boxB):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+
+    # compute the area of intersection rectangle
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+
+    # return the intersection over union value
+    return iou
+
+def json_to_object_list(pred_data):
+    pred_objs = []
+    for obj in pred_data:
+        label = obj['label']
+        xmin = obj['topleft']['x']
+        ymin = obj['topleft']['y']
+        xmax = obj['bottomright']['x']
+        ymax = obj['bottomright']['y']
+        box = [xmin, ymin, xmax, ymax]
+        prediction = Obj(label, box)
+        pred_objs.append(prediction)
+    return pred_objs
+
+def xml_to_object_list(ann_data):
+    gt_objs = []
+    for child in ann_data:
+        if(child.tag == 'object'):
+            for obj in child:
+                if(obj.tag == 'name'):
+                    label = obj.text
+                if(obj.tag == 'bndbox'):
+                    box = []
+                    for bbx in obj:
+                        box.append(int(bbx.text))
+                    groundtruth = Obj(label, box)
+            gt_objs.append(groundtruth)
+    return gt_objs
+
+def calc_accuracy(self):
+    if self.FLAGS.train:
+        annotations = self.FLAGS.val_annotation
+        predictions = self.FLAGS.val_dataset + 'out/'
+    else:
+        annotations = self.FLAGS.imgdir
+        predictions = self.FLAGS.imgdir + 'out/'
+
+    pred_list = glob(predictions + '*')
+    obj_count = 0
+    true_count = 0
+    for pred in pred_list:
+        with open(pred) as f:
+            pred_data = json.load(f)
+            
+        ann = annotations + (pred.split('/'))[4][:-5] + '.xml'
+        ann_data = ET.parse(ann).getroot()
+            
+        pred_objs = json_to_object_list(pred_data)
+        ann_objs = xml_to_object_list(ann_data)
+        
+        for pred_obj in pred_objs:
+            obj_count += 1
+            max_iou = 0
+            for ann_obj in ann_objs:
+                if pred_obj.label != ann_obj.label:
+                    continue
+                iou = bb_intersection_over_union(pred_obj.bbox, ann_obj.bbox)
+                max_iou = max(max_iou, iou)
+            if max_iou > 0.5:
+                true_count += 1
+    if obj_count == 0: obj_count = 1
+    return 100 * true_count/obj_count
 
 def build_train_op(self):
     self.framework.loss(self.out)
@@ -169,3 +262,5 @@ def to_darknet(self):
             layer.h[ph] = None
 
     return darknet_ckpt
+
+

@@ -5,7 +5,7 @@ from . import flow
 from .ops import op_create, identity
 from .ops import HEADER, LINE
 from .framework import create_framework
-from ..dark.darknet import Darknet
+from darkflow.dark.darknet import Darknet
 import json
 import os
 
@@ -32,6 +32,7 @@ class TFNet(object):
 	to_darknet = help.to_darknet
 	build_train_op = help.build_train_op
 	load_from_ckpt = help.load_from_ckpt
+	calc_accuracy = help.calc_accuracy
 
 	def __init__(self, FLAGS, darknet = None):
 		self.ntrain = 0
@@ -138,10 +139,13 @@ class TFNet(object):
 
 		if self.FLAGS.train: self.build_train_op()
 		
-		if self.FLAGS.summary:
+		if self.FLAGS.summary is not None:
 			self.summary_op = tf.summary.merge_all()
-			self.writer = tf.summary.FileWriter(self.FLAGS.summary + 'train')
-		
+			self.writer = tf.summary.FileWriter(os.path.join(self.FLAGS.summary, 'train'))
+
+		if self.FLAGS.val_summary is not None:
+			self.val_writer = tf.summary.FileWriter(os.path.join(self.FLAGS.val_summary, 'val'))
+
 		self.sess = tf.Session(config = tf.ConfigProto(**cfg))
 		self.sess.run(tf.global_variables_initializer())
 
@@ -150,7 +154,7 @@ class TFNet(object):
 			max_to_keep = self.FLAGS.keep)
 		if self.FLAGS.load != 0: self.load_from_ckpt()
 		
-		if self.FLAGS.summary:
+		if self.FLAGS.summary is not None:
 			self.writer.add_graph(self.sess.graph)
 
 	def savepb(self):

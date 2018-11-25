@@ -1,4 +1,4 @@
-from ...utils.pascal_voc_clean_xml import pascal_voc_clean_xml
+from darkflow.utils.pascal_voc_clean_xml import pascal_voc_clean_xml
 from numpy.random import permutation as perm
 from ..yolo.predict import preprocess
 from ..yolo.data import shuffle
@@ -7,7 +7,7 @@ import pickle
 import numpy as np
 import os
 
-def _batch(self, chunk):
+def _batch(self, chunk, training = True):
     """
     Takes a chunk of parsed annotations
     returns value for placeholders of net's 
@@ -23,7 +23,11 @@ def _batch(self, chunk):
     # preprocess
     jpg = chunk[0]; w, h, allobj_ = chunk[1]
     allobj = deepcopy(allobj_)
-    path = os.path.join(self.FLAGS.dataset, jpg)
+    # path = os.path.join(self.FLAGS.dataset, jpg)
+    if (training):
+        path = os.path.join(self.FLAGS.dataset, jpg)
+    else:
+        path = os.path.join(self.FLAGS.val_dataset, jpg)
     img = self.preprocess(path, allobj)
 
     # Calculate regression target
@@ -82,4 +86,3 @@ def _batch(self, chunk):
     }
 
     return inp_feed_val, loss_feed_val
-

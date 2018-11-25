@@ -1,9 +1,9 @@
 import os
 import cv2
-import sys
+from sys import argv
 from dlgdrive import download_file_from_google_drive
 
-args = sys.argv
+args = argv
 
 classcount = int(args[1])
 filtercount = (classcount + 5) * 5
@@ -92,7 +92,7 @@ def configure_darkflow(is_new = True):
 		print(configcfg + ' modified accordingly...')
 	if is_new:
 		Logo = get_class_names()	
-		with open('darkflow/labels.txt', 'w') as labels:
+		with open('labels.txt', 'w') as labels:
 			labels.write('\n'.join(Logo))
 			print('labels.txt file created accordingly...')
 

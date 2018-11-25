@@ -69,9 +69,30 @@ def train(self):
 
         ckpt = (i+1) % (self.FLAGS.save // self.FLAGS.batch)
         args = [step_now, profile]
-        if not ckpt: _save_ckpt(self, *args)
+        if not ckpt:
+            old_acc = self.calc_accuracy()
+            predict(self)
+            acc = self.calc_accuracy()
+            if acc >= old_acc:
+                self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
+                _save_ckpt(self, *args)
+            else:
+                self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
 
-    if ckpt: _save_ckpt(self, *args)
+    if ckpt: 
+        #Predict and calculate accuracy
+        old_acc = self.calc_accuracy()
+        predict(self)
+        acc = self.calc_accuracy()
+        if acc >= old_acc:
+            self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
+            _save_ckpt(self, *args)
+        else:
+            self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
+
+
+        
+
 
 def return_predict(self, im):
     assert isinstance(im, np.ndarray), \
@@ -104,7 +125,10 @@ def return_predict(self, im):
 import math
 
 def predict(self):
-    inp_path = self.FLAGS.imgdir
+    if self.FLAGS.train:
+        inp_path = self.FLAGS.val_dataset
+    else:
+        inp_path = self.FLAGS.imgdir
     all_inps = os.listdir(inp_path)
     all_inps = [i for i in all_inps if self.framework.is_inp(i)]
     if not all_inps:
@@ -146,3 +170,8 @@ def predict(self):
         # Timing
         self.say('Total time = {}s / {} inps = {} ips'.format(
             last, len(inp_feed), len(inp_feed) / last))
+
+        # Calculate accuracy and print if not train
+        if not self.FLAGS.train:
+            acc = self.calc_accuracy()
+            self.say("This epoch's accuracy (%{})".format(acc))
