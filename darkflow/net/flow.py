@@ -63,8 +63,9 @@ def train(self):
         if self.FLAGS.summary:
             self.writer.add_summary(fetched[2], step_now)
 
-        form = 'step {} - loss {} - moving ave loss {}'
-        self.say(form.format(step_now, loss, loss_mva))
+        if step_now % 10 == 0:
+            form = 'step {} - loss {} - moving ave loss {}'
+            self.say(form.format(step_now, loss, loss_mva))
         profile += [(loss, loss_mva)]
 
         ckpt = (i+1) % (self.FLAGS.save // self.FLAGS.batch)

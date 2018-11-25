@@ -34,7 +34,7 @@ class argHandler(dict):
         self.define('save', 2340, 'save checkpoint every ? training examples')
         self.define('demo', '', 'demo on webcam')
         self.define('queue', 1, 'process demo in batch')
-        self.define('json', False, 'Outputs bounding box information in json format.')
+        self.define('json', True, 'Outputs bounding box information in json format.')
         self.define('saveVideo', False, 'Records video from input video or camera')
         self.define('pbLoad', '', 'path to .pb protobuf file (metaLoad must also be specified)')
         self.define('metaLoad', '', 'path to .meta file generated during --savepb that corresponds to .pb file')
