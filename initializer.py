@@ -152,7 +152,7 @@ def move_files_with_bboxes():
 	create_directories()
 	nologocount = 0
 	os.system('cp ' + logospath + '/all.spaces.txt all.spaces.txt')
-	with open(logospath + '/all.spaces.txt', 'r') as all_spaces:
+	with open('/all.spaces.txt', 'r') as all_spaces:
 		for idx, line in enumerate(all_spaces):
 			if nologocount < 10 * classcount:
 				line = line.split()
@@ -221,5 +221,3 @@ def get_class_names():
 			Logo.append(line[0])
 	Logo = list(set(Logo))
 	return Logo
-
-move_files_with_bboxes()
