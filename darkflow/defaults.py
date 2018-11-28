@@ -7,6 +7,7 @@ class argHandler(dict):
     
     def setDefaults(self):
         self.define('imgdir', './logos_test/images/', 'path to testing directory with images')
+        self.define('imgdir_annotation', './logos_test/annotations/', 'path to testing directory with annotations')
         self.define('binary', './bin/', 'path to .weights directory')
         self.define('config', './cfg/', 'path to .cfg directory')
         self.define('dataset', './logos/images/', 'path to dataset directory')

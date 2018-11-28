@@ -76,7 +76,7 @@ def calc_accuracy(self):
         predictions = self.FLAGS.val_dataset + 'out/'
     else:
         annotations = self.FLAGS.imgdir
-        predictions = self.FLAGS.imgdir + 'out/'
+        predictions = self.FLAGS.imgdir_annotation + 'out/'
 
     pred_list = glob(predictions + '*')
     obj_count = 0

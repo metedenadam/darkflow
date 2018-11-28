@@ -57,3 +57,4 @@ logos_val/*
 
 #cython
 darkflow/cython_utils/*
+cfg/yolo-logos.cfg
