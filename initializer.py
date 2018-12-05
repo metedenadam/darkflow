@@ -226,5 +226,6 @@ def move_files_with_bboxes():
 	os.system('rm -rf FlickrLogos-v2')
 	print('Image files moved, xml files created, rest of FlickrLogos-v2 deleted...')
 
+download_dataset()
 move_files_with_bboxes()
 configure_darkflow()

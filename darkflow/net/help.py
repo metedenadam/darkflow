@@ -85,16 +85,16 @@ def calc_accuracy(self):
         with open(pred) as f:
             pred_data = json.load(f)
             
-        ann = annotations + (pred.split('/'))[4][:-5] + '.xml'
+        ann = annotations + (pred.split('/'))[-1][:-5] + '.xml'
         ann_data = ET.parse(ann).getroot()
             
         pred_objs = json_to_object_list(pred_data)
         ann_objs = xml_to_object_list(ann_data)
         
-        for pred_obj in pred_objs:
+        for ann_obj in ann_objs:
             obj_count += 1
             max_iou = 0
-            for ann_obj in ann_objs:
+            for pred_obj in pred_objs:
                 if pred_obj.label != ann_obj.label:
                     continue
                 iou = bb_intersection_over_union(pred_obj.bbox, ann_obj.bbox)
