@@ -5,11 +5,11 @@ from dlgdrive import download_file_from_google_drive
 
 args = argv
 
-classcount = int(args[1])
-filtercount = (classcount + 5) * 5
-originclasscount = int(args[2])
+
+originclasscount = int(args[1])
 originfiltercount = (originclasscount + 5) * 5
 
+logolist = []
 logospath = 'FlickrLogos-v2'
 filespath = 'logos/images'
 annpath = 'logos/annotations'
@@ -18,10 +18,26 @@ testannpath = 'logos_test/annotations'
 valfilespath = 'logos_val/images'
 valannpath = 'logos_val/annotations'
 
-origincfg = args[3]
-configcfg = args[4]
-w_gdriveid = args[5]
-w_filedest = args[6]
+origincfg = args[2]
+configcfg = args[3]
+w_gdriveid = args[4]
+w_filedest = args[5]
+argc = len(args)
+for i in range(6, argc):
+	logolist.append(args[i])
+
+classcount = len(logolist)
+filtercount = (classcount + 5) * 5
+
+if classcount == 0:
+	with open('all.spaces.txt', 'r') as all_spaces:
+		for line in all_spaces:
+			line = line.split()
+			if line[0] == 'no-logo':
+				break
+			logolist.append(line[0])
+	logolist = list(set(logolist))
+
 
 
 xmlBeginTemp = """
@@ -90,10 +106,9 @@ def configure_darkflow(is_new = True):
 		f.write(lines)
 		f.close()
 		print(configcfg + ' modified accordingly...')
-	if is_new:
-		Logo = get_class_names()	
+	if is_new:	
 		with open('labels.txt', 'w') as labels:
-			labels.write('\n'.join(Logo))
+			labels.write('\n'.join(logolist))
 			print('labels.txt file created accordingly...')
 
 def create_directories():
@@ -156,68 +171,60 @@ def move_files_with_bboxes():
 		for idx, line in enumerate(all_spaces):
 			if nologocount < 10 * classcount:
 				line = line.split()
-
-				imgpath = logospath + '/classes/jpg/' + line[0] + '/' + line[1]
-				img_h, img_w, img_d = cv2.imread(imgpath).shape
-				xmlbegindata = {'filename':line[1], 'width':img_w, 'height':img_h, 'depth':img_d}
-				xmlcontent = xmlBeginTemp % xmlbegindata
-				if idx % 15 == 0:
-					os.rename(imgpath, testfilespath + '/' + line[1])
-				elif idx % 49 == 0:
-					os.rename(imgpath, valfilespath + '/' + line[1])
-				else:
-					os.rename(imgpath, filespath + '/' + line[1])
-				
-				if line[0] == 'no-logo':
-					xmlcontent += xmlEndTemp
+				if line[0] in logolist:
+					imgpath = logospath + '/classes/jpg/' + line[0] + '/' + line[1]
+					img_h, img_w, img_d = cv2.imread(imgpath).shape
+					xmlbegindata = {'filename':line[1], 'width':img_w, 'height':img_h, 'depth':img_d}
+					xmlcontent = xmlBeginTemp % xmlbegindata
 					if idx % 15 == 0:
-						txt_path = testannpath + '/' + line[1][:-4] + '.xml'
+						os.rename(imgpath, testfilespath + '/' + line[1])
 					elif idx % 49 == 0:
-						txt_path = valannpath + '/' + line[1][:-4] + '.xml'
+						os.rename(imgpath, valfilespath + '/' + line[1])
 					else:
-						txt_path = annpath + '/' + line[1][:-4] + '.xml'
-					with open(txt_path, 'w') as f:
-						f.write(xmlcontent)
-					nologocount += 1
-				else:
-					fbboxes = logospath + '/classes/masks/' + line[0] + '/' + line[1] + '.bboxes.txt'
-					with open(fbboxes, 'r') as bboxes:
-						bboxes.readline()
-						bbox_list = bboxes.read()
-						bbox_list = bbox_list.split('\n')
-						bbox_list.pop()
-					for bb in bbox_list:
-						bb = list(map(int, bb.split()))
-						x_min = bb[0]
-						y_min = bb[1]
-						x_max = x_min + bb[2]
-						y_max = y_min + bb[3]
-						classname = line[0]
-						objdata = {'name':classname, 'xmin':x_min, 'ymin':y_min, 'xmax':x_max, 'ymax':y_max}
-						objcontent = objTemp % objdata
-						xmlcontent += objcontent
-					xmlcontent += xmlEndTemp
-					if idx % 15 == 0:
-						txt_path = testannpath + '/' + line[1][:-4] + '.xml'
-					elif idx % 49 == 0:
-						txt_path = valannpath + '/' + line[1][:-4] + '.xml'
+						os.rename(imgpath, filespath + '/' + line[1])
+					
+					if line[0] == 'no-logo':
+						xmlcontent += xmlEndTemp
+						if idx % 15 == 0:
+							txt_path = testannpath + '/' + line[1][:-4] + '.xml'
+						elif idx % 49 == 0:
+							txt_path = valannpath + '/' + line[1][:-4] + '.xml'
+						else:
+							txt_path = annpath + '/' + line[1][:-4] + '.xml'
+						with open(txt_path, 'w') as f:
+							f.write(xmlcontent)
+						nologocount += 1
 					else:
-						txt_path = annpath + '/' + line[1][:-4] + '.xml'
-					with open(txt_path, 'w') as f:
-						f.write(xmlcontent)
+						fbboxes = logospath + '/classes/masks/' + line[0] + '/' + line[1] + '.bboxes.txt'
+						with open(fbboxes, 'r') as bboxes:
+							bboxes.readline()
+							bbox_list = bboxes.read()
+							bbox_list = bbox_list.split('\n')
+							bbox_list.pop()
+						for bb in bbox_list:
+							bb = list(map(int, bb.split()))
+							x_min = bb[0]
+							y_min = bb[1]
+							x_max = x_min + bb[2]
+							y_max = y_min + bb[3]
+							classname = line[0]
+							objdata = {'name':classname, 'xmin':x_min, 'ymin':y_min, 'xmax':x_max, 'ymax':y_max}
+							objcontent = objTemp % objdata
+							xmlcontent += objcontent
+						xmlcontent += xmlEndTemp
+						if idx % 15 == 0:
+							txt_path = testannpath + '/' + line[1][:-4] + '.xml'
+						elif idx % 49 == 0:
+							txt_path = valannpath + '/' + line[1][:-4] + '.xml'
+						else:
+							txt_path = annpath + '/' + line[1][:-4] + '.xml'
+						with open(txt_path, 'w') as f:
+							f.write(xmlcontent)
 			else:
 				print("Reached no-logo limit.")
 				break
 	os.system('rm -rf FlickrLogos-v2')
 	print('Image files moved, xml files created, rest of FlickrLogos-v2 deleted...')
 
-def get_class_names():
-	Logo = []
-	with open('all.spaces.txt', 'r') as all_spaces:
-		for line in all_spaces:
-			line = line.split()
-			if line[0] == 'no-logo':
-				break
-			Logo.append(line[0])
-	Logo = list(set(Logo))
-	return Logo
+move_files_with_bboxes()
+configure_darkflow()
