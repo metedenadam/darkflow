@@ -54,6 +54,8 @@ darkflow/.cache/*
 logos/*
 logos_test/*
 logos_val/*
+img_dir/*
+image_tests/*
 
 #cython
 darkflow/cython_utils/*

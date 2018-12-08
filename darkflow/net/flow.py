@@ -71,7 +71,7 @@ def train(self):
         ckpt = (i+1) % (self.FLAGS.save // self.FLAGS.batch)
         args = [step_now, profile]
         if not ckpt:
-            old_acc = self.calc_accuracy()
+            old_acc = acc
             predict(self)
             acc = self.calc_accuracy()
             if acc >= old_acc:
@@ -82,7 +82,7 @@ def train(self):
 
     if ckpt: 
         #Predict and calculate accuracy
-        old_acc = self.calc_accuracy()
+        old_acc = acc
         predict(self)
         acc = self.calc_accuracy()
         if acc >= old_acc:

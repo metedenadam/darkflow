@@ -59,9 +59,12 @@ def preprocess(self, im, allobj = None):
 		im = cv2.imread(im)
 
 	if allobj is not None: # in training mode
+		# cv2.imwrite("./image_tests/before.jpg", im)		
 		im = imcv2_noise(im)
+		# cv2.imwrite("./image_tests/afternoise.jpg", im)
 		result = imcv2_affine_trans(im)
 		im, dims, trans_param = result
+		# cv2.imwrite("./image_tests/afteraffine.jpg", im)
 		scale, offs, flip, vflip = trans_param
 		for obj in allobj:
 			_fix(obj, dims, scale, offs)
@@ -74,9 +77,12 @@ def preprocess(self, im, allobj = None):
 				obj_2_ = obj[2]
 				obj[2] = dims[1] - obj[4]
 				obj[4] = dims[1] - obj_2_
-
+				
 		im = imcv2_recolor(im)
-
+		# cv2.rectangle(im,
+			# (obj[1], obj[2]), (obj[3], obj[4]),
+			# self.meta['colors'][4], (dims[0] + dims[1]) // 300)
+		# cv2.imwrite("./image_tests/afterrecolor.jpg", im)
 	im = self.resize_input(im)
 	if allobj is None: return im
 	return im#, np.array(im) # for unit testing

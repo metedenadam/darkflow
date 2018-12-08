@@ -38,7 +38,7 @@ def imcv2_affine_trans(im):
 	return im, [w, h, c], [scale, [offx, offy], flip, vflip]
 
 def imcv2_noise(im):
-	selection = random.randint(0,4) #create a random number between 0-3, 0-gauss 1-s&p 2-poisson 3-speckle
+	selection = random.randint(0,3) #create a random number between 0-2, 0-gauss 1-s&p 2-speckle
 	h, w, c = im.shape
 	if selection == 0:
 		mean = 0
@@ -61,11 +61,6 @@ def imcv2_noise(im):
 		im[coords] = 0
 		return im
 	elif selection == 2:
-		vals = len(np.unique(im))
-		vals = 2 ** np.ceil(np.log2(vals))
-		noisy = np.random.poisson(im + vals) / float(vals)
-		return noisy
-	elif selection == 3:
 		gauss = np.random.randn(h, w, c)
 		gauss = gauss.reshape(h, w, c)
 		noisy = im + im * gauss
