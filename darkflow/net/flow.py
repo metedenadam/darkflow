@@ -14,6 +14,8 @@ train_stats = (
 )
 pool = ThreadPool()
 
+acc = 0
+
 def _save_ckpt(self, step, loss_profile):
     file = '{}-{}{}'
     model = self.meta['name']
