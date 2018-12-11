@@ -30,7 +30,6 @@ def _save_ckpt(self, step, loss_profile):
 
 
 def train(self):
-    acc = 0
     loss_ph = self.framework.placeholders
     loss_mva = None; profile = list()
 
@@ -64,15 +63,15 @@ def train(self):
         if self.FLAGS.summary:
             self.writer.add_summary(fetched[2], step_now)
 
-        if step_now % 10 == 0:
-            form = 'step {} - loss {} - moving ave loss {}'
-            self.say(form.format(step_now, loss, loss_mva))
+        #if step_now % 10 == 0:
+        form = 'step {} - loss {} - moving ave loss {}'
+        self.say(form.format(step_now, loss, loss_mva))
         profile += [(loss, loss_mva)]
 
         ckpt = (i+1) % (self.FLAGS.save // self.FLAGS.batch)
         args = [step_now, profile]
         if not ckpt:
-            old_acc = acc
+            old_acc = self.calc_accuracy()
             predict(self)
             acc = self.calc_accuracy()
             if acc >= old_acc:
@@ -83,7 +82,7 @@ def train(self):
 
     if ckpt: 
         #Predict and calculate accuracy
-        old_acc = acc
+        old_acc = self.calc_accuracy()
         predict(self)
         acc = self.calc_accuracy()
         if acc >= old_acc:
