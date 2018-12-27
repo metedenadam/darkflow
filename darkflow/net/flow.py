@@ -77,12 +77,13 @@ def train(self):
                 acc = self.calc_accuracy()
             old_acc = acc
             predict(self)
-            acc = self.calc_accuracy()
-            if acc >= old_acc:
-                self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
-                _save_ckpt(self, *args)
-            else:
-                self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
+            if self.FLAGS.json:
+                acc = self.calc_accuracy()
+                if acc >= old_acc:
+                    self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
+                    _save_ckpt(self, *args)
+                else:
+                    self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
 
     if ckpt: 
         #Predict and calculate accuracy
@@ -92,12 +93,13 @@ def train(self):
             acc = self.calc_accuracy()
             old_acc = acc
         predict(self)
-        acc = self.calc_accuracy()
-        if acc >= old_acc:
-            self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
-            _save_ckpt(self, *args)
-        else:
-            self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
+        if self.FLAGS.json:
+            acc = self.calc_accuracy()
+            if acc >= old_acc:
+                self.say("This epoch's accuracy (%{}) is greater than old accuracy (%{}). Saving...".format(acc, old_acc))
+                _save_ckpt(self, *args)
+            else:
+                self.say("This epoch's accuracy (%{}) is less than old accuracy (%{}).".format(acc, old_acc))
 
 
         
@@ -181,6 +183,7 @@ def predict(self):
             last, len(inp_feed), len(inp_feed) / last))
 
         # Calculate accuracy and print if not train
-        if not self.FLAGS.train:
-            acc = self.calc_accuracy()
-            self.say("This epoch's accuracy (%{})".format(acc))
+        if self.FLAGS.json:
+            if not self.FLAGS.train:
+                acc = self.calc_accuracy()
+                self.say("This epoch's accuracy (%{})".format(acc))

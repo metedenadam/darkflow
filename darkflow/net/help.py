@@ -78,7 +78,7 @@ def calc_accuracy(self):
         annotations = self.FLAGS.imgdir_annotation
         predictions = self.FLAGS.imgdir + 'out/'
 
-    pred_list = glob(predictions + '*')
+    pred_list = glob(predictions + '*.json')
     obj_count = 0
     true_count = 0
     for pred in pred_list:

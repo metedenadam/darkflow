@@ -5,10 +5,10 @@ from dlgdrive import download_file_from_google_drive
 
 args = argv
 
-
 originclasscount = int(args[1])
 originfiltercount = (originclasscount + 5) * 5
 
+ClassesDict = {}
 logolist = []
 logospath = 'FlickrLogos-v2'
 filespath = 'logos/images'
@@ -22,9 +22,11 @@ origincfg = args[2]
 configcfg = args[3]
 w_gdriveid = args[4]
 w_filedest = args[5]
+download = True if args[6] == "True" else False
 argc = len(args)
-for i in range(6, argc):
+for i in range(7, argc):
 	logolist.append(args[i])
+	ClassesDict[args[i]] = i-7 
 
 classcount = len(logolist)
 filtercount = (classcount + 5) * 5
@@ -37,6 +39,7 @@ if classcount == 0:
 				break
 			logolist.append(line[0])
 	logolist = list(set(logolist))
+	classcount = len(logolist)
 
 
 
@@ -162,6 +165,66 @@ def create_directories():
 	except FileExistsError:
 		print('logos_val/annotations already exists')
 
+def convert(size, box):
+   x = (box[0] + box[1])/2.0
+   y = (box[2] + box[3])/2.0
+   w = box[1] - box[0]
+   h = box[3] - box[2]
+   dw = 1./size[0]
+   dh = 1./size[1]
+   x = x*dw
+   w = w*dw
+   y = y*dh
+   h = h*dh
+   return (x,y,w,h)
+
+def move_files_with_bboxes_2():
+	os.system('mv FlickrLogos-v2/classes/masks/hp FlickrLogos-v2/classes/masks/HP')
+	with open(logospath + '/all.spaces.txt', 'r') as all_spaces:
+		for idx, line in enumerate(all_spaces):
+			line = line.split()
+			if line[0] == "no-logo":
+				continue
+			elif line[0] in logolist:
+				imgpath = logospath + '/classes/jpg/' + line[0] + '/' + line[1]
+				img_h, img_w, img_d = cv2.imread(imgpath).shape
+				if idx % 15 == 0:
+					os.rename(imgpath, testfilespath + '/' + line[1])
+				elif idx % 49 == 0:
+					os.rename(imgpath, valfilespath + '/' + line[1])
+				else:
+					os.rename(imgpath, filespath + '/' + line[1])
+				fbboxes = logospath + '/classes/masks/' + line[0] + '/' + line[1] + '.bboxes.txt'
+				with open(fbboxes, 'r') as bboxes:
+					new_text = ""
+					bboxes.readline()
+					bbox_list = bboxes.read()
+					bbox_list = bbox_list.split('\n')
+					bbox_list.pop()
+				for bb in bbox_list:
+					bb = list(map(int, bb.split()))
+					x_min = bb[0]
+					y_min = bb[1]
+					x_max = x_min + bb[2]
+					y_max = y_min + bb[3]
+					classname = line[0]
+					class_id = ClassesDict[classname]
+					b = (float(x_min), float(x_max), float(y_min), float(y_max))
+					bbox = convert((img_w,img_h), b)
+					new_text += (str(class_id) + " " + " ".join([str(a) for a in bbox]) + '\n')
+				if idx % 15 == 0:
+					txt_path = testannpath + '/' + line[1][:-4] + '.txt'
+				elif idx % 49 == 0:
+					txt_path = valannpath + '/' + line[1][:-4] + '.txt'
+				else:
+					txt_path = annpath + '/' + line[1][:-4] + '.txt'
+				with open(txt_path, 'w') as f:
+					f.write(xmlcontent)
+
+	os.system('rm -rf FlickrLogos-v2')
+	print('Image files moved, xml files created, rest of FlickrLogos-v2 deleted...')
+
+
 def move_files_with_bboxes():
 	os.system('mv FlickrLogos-v2/classes/masks/hp FlickrLogos-v2/classes/masks/HP')
 	create_directories()
@@ -226,6 +289,7 @@ def move_files_with_bboxes():
 	os.system('rm -rf FlickrLogos-v2')
 	print('Image files moved, xml files created, rest of FlickrLogos-v2 deleted...')
 
-download_dataset()
+if download:
+    download_dataset()
 move_files_with_bboxes()
 configure_darkflow()

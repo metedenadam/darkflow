@@ -63,3 +63,5 @@ cfg/yolo-logos.cfg
 FlickrLogos-v2/*
 labels.txt
 cfg/tiny-yolo-logos.cfg
+downloads/*
+logos__/*
